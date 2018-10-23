@@ -25,6 +25,7 @@ int main(int argc, char *argv[])
     struct sockaddr_in from;
     char buf[1024];
     
+    
     if (argc < 2) {
         fprintf(stderr, "ERROR, no port provided\n");
         exit(0);
@@ -45,6 +46,13 @@ int main(int argc, char *argv[])
         if (n < 0) error("recvfrom");
         write(1,"Received a datagram: ",21);
         write(1,buf,n);
+        
+        char snum[10];
+        itoa(n, snum, 11);
+        
+        // print our string
+        printf("%s\n", snum);
+        
         n = sendto(sock,"Got your message\n",17,
                    0,(struct sockaddr *)&from,fromlen);
         if (n  < 0) error("sendto");
