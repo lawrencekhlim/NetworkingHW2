@@ -1,6 +1,8 @@
 /* UDP client in the internet domain */
+
+// Used sample code from October 12th discussion section
 // Lawrence Lim
-// Copied from discusion section slides
+// Perm: 4560892
 
 #include <sys/types.h>
 #include <sys/socket.h>

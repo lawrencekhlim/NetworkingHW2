@@ -1,3 +1,8 @@
+// Used sample codes from October 12th discussion section.
+// Lawrence Lim
+// Perm: 4560892
+
+
 /* Creates a datagram server.  The port
  number is passed as an argument.  This
  server runs forever */
@@ -16,7 +21,7 @@ void error(const char *msg)
     perror(msg);
     exit(0);
 }
-
+// Recursively add together the digits and send to client
 void recurse_addition (int sock, struct sockaddr_in from, socklen_t fromlen, char buffer [], int buffer_length) {
     if (buffer_length == 1) {
         int n = sendto(sock,buffer, 1, 0,(struct sockaddr *)&from,fromlen);
@@ -37,11 +42,12 @@ void recurse_addition (int sock, struct sockaddr_in from, socklen_t fromlen, cha
             count ++;
 	}
         
-	//write (1, new_buffer, count);
-	int n = sendto (sock, new_buffer, count, 0,  (struct sockaddr *)&from,fromlen);
-        recurse_addition (sock, from, fromlen, new_buffer, count);
-
-	if (n < 0) error ("sendto");
+	//write (1, new_buffer, count);i
+	if (count > 1) {	
+	    int n = sendto (sock, new_buffer, count, 0,  (struct sockaddr *)&from,fromlen);
+	    if (n < 0) error ("sendto");
+	}    
+	recurse_addition (sock, from, fromlen, new_buffer, count);
     }
 }	
 
@@ -72,8 +78,8 @@ int main(int argc, char *argv[])
     while (1) {
         n = recvfrom(sock,buf,1024,0,(struct sockaddr *)&from,&fromlen);
         if (n < 0) error("recvfrom");
-        //write(1,"Received a datagram: ",21);
-        //write(1,buf,n);
+
+	// First check there are no non-numerical characters
         int count = n;
         int non_num = 0;
 	int ignore_last = 0;
@@ -83,28 +89,20 @@ int main(int argc, char *argv[])
 	    else if (i == count-1) {
 		if (buf [i] < '0' || buf [i] > '9')
 		    ignore_last = 1;
-
 	    } 
-		     
 	}
-        
 	if (non_num) {
-             n = sendto(sock,"Can not compute",17,
-                   0,(struct sockaddr *)&from,fromlen);
+             n = sendto(sock,"Can not compute",17, 0,(struct sockaddr *)&from,fromlen);
 	}
 	else {
-
             char newstr [1024];
             strcpy(newstr, buf);            
 	    if (ignore_last) {
-	        newstr [count-1] = '\0';
+		count = count-1;
+	        newstr [count] = '\0';
 	    }
 
-
-          //   n = sendto(sock,"Got your message\n",17,
-          //         0,(struct sockaddr *)&from,fromlen);
-
-	     recurse_addition (sock, from, fromlen, newstr, count-1);
+	     recurse_addition (sock, from, fromlen, newstr, count);
 	}
         if (n  < 0) error("sendto");
     }
